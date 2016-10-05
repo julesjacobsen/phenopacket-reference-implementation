@@ -4,27 +4,34 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.phenopackets.api.model.association.PhenotypeAssociation.Builder;
 import org.phenopackets.api.model.entity.Entity;
 import org.phenopackets.api.model.entity.Variant;
 import org.phenopackets.api.model.evidence.Evidence;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.ImmutableList;
 
 @JsonDeserialize(builder = VariantAssociation.Builder.class)
-@JsonPropertyOrder({"entity", "variant", "evidence"})
+@JsonPropertyOrder({"entity", "variant", "evidence", "contributor", "date"})
 public class VariantAssociation implements Association {
 
 	private final Variant variant;
 	private final String entityId;
+	private final String contributorId;
+	private final String date;
 	private final List<Evidence> evidence;
 
     private VariantAssociation(Builder builder) {
         this.variant = builder.variant;
         this.entityId = builder.entityId;
+        this.contributorId = builder.contributorId;
+        this.date = builder.date;
         this.evidence = ImmutableList.copyOf(builder.evidence);
     }
 
@@ -35,6 +42,16 @@ public class VariantAssociation implements Association {
     @Override
     public String getEntityId() {
         return entityId;
+    }
+    
+    @Override
+    public String getContributorId() {
+        return contributorId;
+    }
+    
+    @Override
+    public String getDate() {
+        return date;
     }
 
 	@Override
@@ -49,12 +66,14 @@ public class VariantAssociation implements Association {
         VariantAssociation that = (VariantAssociation) o;
         return Objects.equals(variant, that.variant) &&
                 Objects.equals(entityId, that.entityId) &&
-                Objects.equals(evidence, that.evidence);
+                Objects.equals(evidence, that.evidence) &&
+                Objects.equals(contributorId, that.contributorId) &&
+                Objects.equals(date, that.date);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(variant, entityId, evidence);
+        return Objects.hash(variant, entityId, evidence, contributorId, date);
     }
 
     @Override
@@ -63,6 +82,8 @@ public class VariantAssociation implements Association {
                 "phenotype=" + variant +
                 ", entityId=" + entityId +
                 ", evidence=" + evidence +
+                ", contributorId=" + contributorId +
+                ", date=" + date +
                 '}';
     }
 
@@ -72,7 +93,12 @@ public class VariantAssociation implements Association {
 
         @JsonProperty("entity")
         private String entityId;
+        @JsonProperty("contributor")
+        private String contributorId;
+        @JsonProperty("date")
+        private String date;
         @JsonProperty
+        @JsonInclude(Include.NON_EMPTY)
         private List<Evidence> evidence = new ArrayList<>();
 
         @JsonCreator
@@ -88,6 +114,16 @@ public class VariantAssociation implements Association {
         public Builder setEntityId(String entityId) {
             this.entityId = entityId;
             return this;
+        }
+        
+        public Builder setContributorId(String contributorId) {
+        	this.contributorId = contributorId;
+        	return this;
+        }
+        
+        public Builder setDate(String date) {
+        	this.date = date;
+        	return this;
         }
 
         public Builder setEvidence(List<Evidence> evidence) {
